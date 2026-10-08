@@ -51,7 +51,8 @@ export function resultsView(ctx, examState) {
       h('p', { class: 'score-big' }, `${s.correct}/${s.total}`),
       h('p', null, `Başarı: %${s.percent}`),
       h('p', null, `Doğru: ${s.correct} · Yanlış: ${s.wrong} · Boş: ${s.blank}`),
-      h('p', { class: 'muted' }, 'Yanlış cevaplar doğruları götürmez.'),
+      h('p', { class: 'net' }, `Net: ${s.net.toFixed(2).replace('.', ',')} (doğru − yanlış/3)`),
+      h('p', { class: 'muted' }, '3 yanlış cevap 1 doğru cevabı götürür; boş sorular neti etkilemez.'),
     ),
     h('section', { class: 'card' }, h('h2', null, 'Soru türlerine göre'), h('ul', { class: 'breakdown' }, breakdown)),
     s.weakUnits.length

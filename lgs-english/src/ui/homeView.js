@@ -4,11 +4,16 @@ import { loadProgress, loadSession } from '../lib/storage.js';
 import { formatTime, remainingSeconds } from '../lib/timer.js';
 import { screenRoot } from './questionView.js';
 
-export function homeView(ctx) {
+export function homeView(ctx, arg = {}) {
   const progress = loadProgress(ctx.store);
   const session = loadSession(ctx.now(), ctx.store);
   const left = session ? formatTime(remainingSeconds(session.deadlineMs, ctx.now())) : null;
-  const resume = () => ctx.go('exam', { session });
+  // The label may be stale: re-check on click; an expired session is discarded (same as reload).
+  const resume = () => {
+    const fresh = loadSession(ctx.now(), ctx.store);
+    if (fresh) ctx.go('exam', { session: fresh });
+    else ctx.go('home', { expired: true });
+  };
   const start = () => (session ? resume() : ctx.go('exam', {}));
 
   const unitCards = UNITS.map((u) => {
@@ -59,6 +64,7 @@ export function homeView(ctx) {
       { class: 'intro' },
       'Bu derste 8. sınıf İngilizce müfredatındaki 10 üniteyi tekrar edeceksin. Her ünitede kelimeleri, kalıpları ve dilbilgisini çalış, kısa alıştırmayı çöz; sonra LGS tarzı final sınavına gir.',
     ),
+    arg.expired ? h('p', { class: 'card notice', role: 'status' }, 'Önceki sınavın süresi doldu.') : null,
     session
       ? h(
           'div',

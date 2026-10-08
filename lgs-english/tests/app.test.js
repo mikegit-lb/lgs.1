@@ -70,6 +70,16 @@ const options = (root) => [...root.querySelectorAll('.option')];
 const navBtns = (root) => [...root.querySelectorAll('.nav-btn')];
 const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true }));
 const startExam = (root) => click(root, 'Sınava başla');
+function noStrayText(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const bad = [];
+  while (walker.nextNode()) {
+    const t = walker.currentNode.textContent.trim();
+    if (t === 'null' || t === 'undefined') bad.push(t);
+  }
+  expect(bad).toEqual([]);
+  expect(root.textContent).not.toMatch(/\bnull\b|\bundefined\b|NaN/);
+}
 
 describe('Home', () => {
   it('lists 10 unit cards and the final exam card', () => {
@@ -198,7 +208,10 @@ describe('Exam', () => {
     expect(navBtns(root).length).toBe(10);
     expect(root.querySelectorAll('h1').length).toBe(1);
     expect(root.querySelector('[role="timer"]').textContent).toBe('15:00');
-    expect(root.textContent).toContain('Yanlış cevaplar doğruları götürmez');
+    expect(root.querySelector('.exam-note').textContent).toBe(
+      '3 yanlış cevap 1 doğru cevabı götürür. Boş bıraktığın sorular puanını etkilemez.',
+    );
+    expect(root.textContent).not.toContain('götürmez');
   });
 
   it('clicking the selected option keeps it (R7); "Cevabı temizle" clears; last selection wins', () => {
@@ -256,9 +269,14 @@ describe('Exam', () => {
     expect(dlg).not.toBeNull();
     expect(dlg.getAttribute('aria-modal')).toBe('true');
     expect(dlg.textContent).toContain('3 soru boş');
+    expect(dlg.textContent).toContain('Boş sorular puanını etkilemez');
     expect(dlg.contains(document.activeElement)).toBe(true);
+    const examMain = root.querySelector('.exam-main');
+    expect(examMain.hasAttribute('inert')).toBe(true);
+    expect(examMain.contains(dlg)).toBe(false);
     click(root, 'Vazgeç');
     expect(root.querySelector('[role="dialog"]')).toBeNull();
+    expect(examMain.hasAttribute('inert')).toBe(false);
     expect(screen(root)).toBe('exam');
     click(root, 'Sınavı bitir');
     key('Escape');
@@ -271,6 +289,9 @@ describe('Exam', () => {
     expect(Number(r.correct) + Number(r.wrong) + Number(r.blank)).toBe(10);
     expect(Number(r.blank)).toBe(3);
     expect(root.textContent).toContain('4/10');
+    expect(Number(r.wrong)).toBe(3);
+    expect(root.textContent).toContain('Net: 3,00');
+    expect(root.textContent).toContain('Doğru: 4 · Yanlış: 3 · Boş: 3');
     expect(root.textContent).toContain('Doğru cevap');
     expect(root.textContent).toContain('Senin cevabın');
     expect(root.textContent).toContain('Boş bırakıldı');
@@ -289,7 +310,7 @@ describe('Exam', () => {
       options(root)[0].click();
     }
     click(root, 'Sınavı bitir');
-    expect(root.querySelector('[role="dialog"]').textContent).toContain('Tüm sorular cevaplandı');
+    expect(root.querySelector('[role="dialog"]').textContent).toContain('Tüm soruları cevapladın.');
   });
 
   it('auto-submits exactly once when the clock passes 15:00', () => {
@@ -393,16 +414,53 @@ describe('Exam', () => {
     weak.click();
     expect(screen(root)).toBe('study');
   });
-  it('session expiring between Home and resume click goes straight to results (recorded once)', () => {
+  it('stale resume button: session expired since Home rendered is discarded with a notice', () => {
     const store = memStore();
     const clock = { t: 1_000_000 };
     saveSession({ exam: createExam(EXAM_QUESTIONS), deadlineMs: clock.t + 2_000 }, store);
     const s = setup(store, clock);
     clock.t += 5_000;
     click(s.root, 'Sınava devam et');
-    expect(screen(s.root)).toBe('results');
+    expect(screen(s.root)).toBe('home');
+    expect(s.root.textContent).toContain('Önceki sınavın süresi doldu.');
+    expect(btn(s.root, 'Sınava devam et')).toBeUndefined();
     expect(s.timers.size).toBe(0);
-    expect(store.log.filter((k) => k === PROGRESS_KEY).length).toBe(1);
+    expect(store.getItem(SESSION_KEY)).toBeNull();
+    expect(store.log.filter((k) => k === PROGRESS_KEY).length).toBe(0);
+  });
+
+  it('practice keys a–d select only while unanswered', () => {
+    const { root } = setup();
+    click(root, 'Friendship');
+    click(root, 'Alıştırmaya başla');
+    const q = practiceFor(1)[0];
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', ctrlKey: true }));
+    expect(root.querySelectorAll('.option.correct').length).toBe(0);
+    key('ABCD'[(q.answer + 1) % 4]);
+    expect(options(root)[(q.answer + 1) % 4].classList.contains('incorrect')).toBe(true);
+    key('abcd'[q.answer]);
+    expect(root.querySelectorAll('.option.incorrect').length).toBe(1);
+    expect(options(root)[(q.answer + 1) % 4].classList.contains('incorrect')).toBe(true);
+  });
+
+  it('no stray "null"/"undefined" text on any screen', () => {
+    const store = memStore();
+    const { root } = setup(store);
+    noStrayText(root);
+    click(root, 'Friendship');
+    noStrayText(root);
+    click(root, 'Alıştırmaya başla');
+    noStrayText(root);
+    options(root)[0].click();
+    noStrayText(root);
+    click(root, 'Ana sayfa');
+    startExam(root);
+    noStrayText(root);
+    click(root, 'Sınavı bitir');
+    noStrayText(root);
+    click(root, 'Evet, bitir');
+    expect(screen(root)).toBe('results');
+    noStrayText(root);
   });
 
   it('announces remaining time only at thresholds', () => {

@@ -26,5 +26,7 @@ export function summarize(state) {
   }
   const wrong = items.filter((it) => it.status === 'wrong').length;
   const blank = items.filter((it) => it.status === 'blank').length;
-  return { correct, wrong, blank, total, percent: total ? Math.round((correct / total) * 100) : 0, byType, items, weakUnits };
+  // LGS rule: 3 wrong answers cancel 1 correct; blanks do not affect the net.
+  const net = Math.round((correct - wrong / 3) * 100) / 100;
+  return { correct, wrong, blank, net, total, percent: total ? Math.round((correct / total) * 100) : 0, byType, items, weakUnits };
 }

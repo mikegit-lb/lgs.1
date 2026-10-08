@@ -35,13 +35,15 @@ export function practiceView(ctx, unitId) {
         ),
       );
     }
-    el.append(
+    // Element.append() stringifies null, so filter out the absent feedback block.
+    const parts = [
       h('p', { class: 'unit-number' }, `Ünite ${u.id} – ${u.trName}`),
       h('h1', null, `Alıştırma: Soru ${i + 1}/${state.questions.length}`),
       h('div', { lang: 'en' }, renderQuestion(q, { reveal: chosen === null ? null : { chosen }, onChoose: pick })),
       feedback,
       h('div', { class: 'actions' }, homeBtn()),
-    );
+    ];
+    el.append(...parts.filter(Boolean));
     if (focusFeedback && feedback) feedback.focus();
   }
 
@@ -76,6 +78,24 @@ export function practiceView(ctx, unitId) {
     h1.focus();
   }
 
+  function onKey(e) {
+    if (el.dataset.screen !== 'practice' || state.chosen[state.current] !== null) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName || ''))) return;
+    const k = String(e.key);
+    const idx = k.length === 1 ? 'abcd'.indexOf(k.toLowerCase()) : -1;
+    if (idx >= 0) {
+      e.preventDefault();
+      pick(idx);
+    }
+  }
+
   renderQ(false);
-  return { el, title: `Alıştırma – ${u.trName}` };
+  document.addEventListener('keydown', onKey);
+  return {
+    el,
+    title: `Alıştırma – ${u.trName}`,
+    dispose: () => document.removeEventListener('keydown', onKey),
+  };
 }

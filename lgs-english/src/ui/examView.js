@@ -47,18 +47,19 @@ export function examView(ctx, arg = {}) {
   const timerEl = h('span', { class: 'timer', role: 'timer', 'aria-label': 'Kalan süre' });
   const live = h('p', { class: 'visually-hidden', 'aria-live': 'polite' });
   const body = h('div', { class: 'exam-body' });
-  const el = screenRoot(
-    'exam',
+  const main = h(
+    'div',
+    { class: 'exam-main' },
     h(
       'div',
       { class: 'exam-header' },
       h('h1', null, 'Final Sınavı'),
       h('p', { class: 'timer-wrap' }, 'Kalan süre: ', timerEl),
     ),
-    h('p', { class: 'exam-note' }, 'Yanlış cevaplar doğruları götürmez. Boş bıraktığın sorular yanlış sayılır.'),
-    live,
+    h('p', { class: 'exam-note' }, '3 yanlış cevap 1 doğru cevabı götürür. Boş bıraktığın sorular puanını etkilemez.'),
     body,
   );
+  const el = screenRoot('exam', main, live);
 
   const persist = () => saveSession({ exam: state, deadlineMs }, ctx.store);
 
@@ -130,7 +131,7 @@ export function examView(ctx, arg = {}) {
         h('button', { type: 'button', class: 'btn btn-secondary flag-btn', 'aria-pressed': String(state.flagged[i]), onclick: () => update(toggleFlag(state, i), '.flag-btn') }, state.flagged[i] ? 'Bayrağı kaldır' : 'Bayrakla'),
         h('button', { type: 'button', class: 'btn btn-secondary clear-btn', disabled: state.answers[i] === null, onclick: clearAnswer }, 'Cevabı temizle'),
         h('button', { type: 'button', class: 'btn btn-primary submit-btn', onclick: openDialog }, 'Sınavı bitir'),
-        h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => ctx.go('home') }, 'Ana sayfa (sınav kaydedilir)'),
+        h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => ctx.go('home') }, 'Ana sayfaya dön (ilerlemen kaydedilir)'),
       ),
     );
     if (focusSel) {
@@ -142,23 +143,28 @@ export function examView(ctx, arg = {}) {
   function openDialog() {
     if (dialog || finished) return;
     const blank = unansweredCount(state);
-    const msg = blank > 0 ? `Sınavı bitirmek istiyor musun? ${blank} soru boş.` : 'Sınavı bitirmek istiyor musun? Tüm sorular cevaplandı.';
+    const msg =
+      blank > 0
+        ? `${blank} soru boş. Boş sorular puanını etkilemez; ancak istersen geri dönüp cevaplayabilirsin.`
+        : 'Tüm soruları cevapladın.';
     const cancel = h('button', { type: 'button', class: 'btn btn-secondary', onclick: closeDialog }, 'Vazgeç');
     const confirm = h('button', { type: 'button', class: 'btn btn-primary', onclick: finish }, 'Evet, bitir');
     const box = h(
       'div',
       { class: 'dialog', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'submit-title', 'aria-describedby': 'submit-desc' },
       h('h2', { id: 'submit-title' }, 'Sınavı bitir'),
+      h('p', null, 'Sınavı bitirmek istiyor musun?'),
       h('p', { id: 'submit-desc' }, msg),
-      blank > 0 ? h('p', null, 'Boş sorular yanlış sayılır.') : null,
       h('div', { class: 'dialog-actions' }, cancel, confirm),
     );
     dialog = { backdrop: h('div', { class: 'dialog-backdrop' }, box), first: cancel, last: confirm };
     el.appendChild(dialog.backdrop);
+    main.setAttribute('inert', '');
     cancel.focus();
   }
   function closeDialog() {
     if (!dialog) return;
+    main.removeAttribute('inert');
     dialog.backdrop.remove();
     dialog = null;
     body.querySelector('.submit-btn')?.focus();

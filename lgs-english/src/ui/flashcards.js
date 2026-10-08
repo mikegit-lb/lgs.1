@@ -3,7 +3,7 @@ import { h } from './dom.js';
 export function renderFlashcards(words) {
   const root = h('div', { class: 'flashcards' });
   if (!Array.isArray(words) || words.length === 0) {
-    root.appendChild(h('p', { class: 'empty' }, 'No words yet.'));
+    root.appendChild(h('p', { class: 'empty' }, 'Henüz kelime yok.'));
     return root;
   }
 
@@ -13,21 +13,22 @@ export function renderFlashcards(words) {
   const live = h('p', { class: 'visually-hidden', 'aria-live': 'polite' });
   const cardBtn = h('button', { class: 'flashcard', type: 'button' });
   const counter = h('span', { class: 'flashcard-counter' });
-  const prev = h('button', { class: 'btn btn-secondary', type: 'button', onclick: () => go(-1) }, '‹ Prev');
-  const next = h('button', { class: 'btn btn-secondary', type: 'button', onclick: () => go(1) }, 'Next ›');
+  const prev = h('button', { class: 'btn btn-secondary', type: 'button', 'aria-label': 'Önceki kart', onclick: () => go(-1) }, '‹ Önceki');
+  const next = h('button', { class: 'btn btn-secondary', type: 'button', 'aria-label': 'Sonraki kart', onclick: () => go(1) }, 'Sonraki ›');
 
   function paint(announce) {
     const w = words[index];
     const text = flipped ? w.tr : w.en;
+    const lang = flipped ? 'Türkçe' : 'İngilizce';
     cardBtn.textContent = '';
-    cardBtn.appendChild(h('span', { class: 'flashcard-lang' }, flipped ? 'Türkçe' : 'English'));
-    cardBtn.appendChild(h('span', { class: 'flashcard-word' }, text));
+    cardBtn.appendChild(h('span', { class: 'flashcard-lang' }, lang));
+    cardBtn.appendChild(h('span', { class: 'flashcard-word', lang: flipped ? 'tr' : 'en' }, text));
     cardBtn.classList.toggle('flipped', flipped);
-    cardBtn.setAttribute('aria-label', `${flipped ? 'Türkçe' : 'English'}: ${text}. Press to flip.`);
+    cardBtn.setAttribute('aria-label', `${lang}: ${text}. Kartı çevir.`);
     counter.textContent = `${index + 1} / ${words.length}`;
     prev.disabled = index === 0;
     next.disabled = index === words.length - 1;
-    live.textContent = announce ? `${flipped ? 'Türkçe' : 'English'}: ${text}` : '';
+    live.textContent = announce ? `${lang}: ${text}` : '';
   }
 
   function go(delta) {

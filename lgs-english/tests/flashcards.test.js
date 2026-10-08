@@ -30,25 +30,35 @@ describe('renderFlashcards', () => {
   it('Next advances, counter updates, flip resets', () => {
     const el = renderFlashcards(WORDS);
     card(el).click();
-    btn(el, 'Next').click();
+    btn(el, 'Sonraki').click();
     expect(el.textContent).toContain('2 / 3');
     expect(card(el).textContent).toContain('dog');
     expect(card(el).textContent).not.toContain('köpek');
   });
   it('Prev at 1 stays at 1, disabled; Next at n stays at n, disabled', () => {
     const el = renderFlashcards(WORDS);
-    expect(btn(el, 'Prev').disabled).toBe(true);
-    btn(el, 'Prev').click();
+    expect(btn(el, 'Önceki').disabled).toBe(true);
+    btn(el, 'Önceki').click();
     expect(el.textContent).toContain('1 / 3');
-    btn(el, 'Next').click();
-    btn(el, 'Next').click();
+    btn(el, 'Sonraki').click();
+    btn(el, 'Sonraki').click();
     expect(el.textContent).toContain('3 / 3');
-    expect(btn(el, 'Next').disabled).toBe(true);
-    btn(el, 'Next').click();
+    expect(btn(el, 'Sonraki').disabled).toBe(true);
+    btn(el, 'Sonraki').click();
     expect(el.textContent).toContain('3 / 3');
-    btn(el, 'Prev').click();
+    btn(el, 'Önceki').click();
     expect(el.textContent).toContain('2 / 3');
-    expect(btn(el, 'Next').disabled).toBe(false);
+    expect(btn(el, 'Sonraki').disabled).toBe(false);
+  });
+  it('UI chrome is Turkish', () => {
+    const el = renderFlashcards(WORDS);
+    expect(el.textContent).toContain('İngilizce');
+    expect(el.textContent).not.toMatch(/English|Prev|Next/);
+    expect(card(el).getAttribute('aria-label')).toContain('Kartı çevir');
+    expect(btn(el, 'Önceki').getAttribute('aria-label')).toBe('Önceki kart');
+    expect(btn(el, 'Sonraki').getAttribute('aria-label')).toBe('Sonraki kart');
+    card(el).click();
+    expect(card(el).textContent).toContain('Türkçe');
   });
   it('words render as text only', () => {
     const el = renderFlashcards([{ en: '<img src=x onerror=alert(1)>', tr: '<b>x</b>' }]);
@@ -70,9 +80,9 @@ describe('renderFlashcards', () => {
   it('focus moves to card when focused button becomes disabled', () => {
     const el = renderFlashcards(WORDS);
     document.body.appendChild(el);
-    btn(el, 'Next').click();
-    btn(el, 'Next').focus();
-    btn(el, 'Next').click();
+    btn(el, 'Sonraki').click();
+    btn(el, 'Sonraki').focus();
+    btn(el, 'Sonraki').click();
     expect(document.activeElement).toBe(card(el));
     el.remove();
   });

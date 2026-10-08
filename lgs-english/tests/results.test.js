@@ -11,6 +11,25 @@ const wrongOf = (i) => (keys[i] + 1) % 4;
 // correct: 0,1,4 | wrong: 2,5,7 | blank: 3,6,8,9
 const MIXED = keys.map((k, i) => ([0, 1, 4].includes(i) ? k : [2, 5, 7].includes(i) ? wrongOf(i) : null));
 
+const pattern = (c, w) => keys.map((k, i) => (i < c ? k : i < c + w ? wrongOf(i) : null));
+
+describe('summarize net (3 yanlış 1 doğruyu götürür)', () => {
+  it.each([
+    [10, 0, 10],
+    [7, 0, 7],
+    [7, 3, 6],
+    [6, 3, 5],
+    [0, 10, -3.33],
+  ])('%i correct, %i wrong -> net %d', (c, w, net) => {
+    const r = summarize(fill(pattern(c, w)));
+    expect(r.correct).toBe(c);
+    expect(r.wrong).toBe(w);
+    expect(r.blank).toBe(10 - c - w);
+    expect(r.net).toBe(net);
+    expect(r.percent).toBe(c * 10);
+  });
+});
+
 describe('summarize', () => {
   it('all correct -> 100%, no weak units', () => {
     const r = summarize(fill(keys));
