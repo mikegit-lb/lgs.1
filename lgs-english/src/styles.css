@@ -76,7 +76,7 @@ p { margin: 0 0 0.75em; }
   min-height: 48px; margin: 0 0 10px; padding: 10px 14px;
   font: inherit; text-align: left; color: var(--text);
   background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius);
-  cursor: pointer;
+  cursor: pointer; position: relative;
 }
 .option .letter {
   flex: none; display: inline-flex; align-items: center; justify-content: center;
@@ -87,11 +87,17 @@ p { margin: 0 0 0.75em; }
 .option.selected .letter { color: var(--primary-text); background: var(--primary); }
 .option.correct { border-color: var(--correct); background: var(--correct-bg); }
 .option.correct .letter { color: #fff; background: var(--correct); }
-.option.correct .letter::after { content: '¹3'; }
+.option.correct::after, .option.incorrect::after {
+  position: absolute; top: -8px; right: -4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; font-size: 0.8125rem; font-weight: 700; line-height: 1;
+  color: #fff; border-radius: 50%;
+}
+.option.correct::after { content: "\2713"; background: var(--correct); }
 .option.incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); }
 .option.incorrect { border-style: dashed; }
 .option.incorrect .letter { color: #fff; background: var(--incorrect); }
-.option.incorrect .letter::after { content: '¹7'; }
+.option.incorrect::after { content: "\2717"; background: var(--incorrect); }
 
 /* Question navigation strip */
 .nav-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
@@ -103,9 +109,9 @@ p { margin: 0 0 0.75em; }
 }
 .nav-btn { position: relative; }
 .nav-btn.answered { background: #e0e7ff; border-color: var(--primary); }
-.nav-btn.answered::after { content: '¹3'; position: absolute; top: 0; right: 3px; font-size: 0.7rem; }
+.nav-btn.answered::after { content: "\2713"; position: absolute; top: 1px; right: 3px; font-size: 0.7rem; line-height: 1; }
 .nav-btn.flagged { background: var(--flag-bg); border-color: var(--flag); color: var(--flag); }
-.nav-btn.flagged::after { content: '91'; position: absolute; top: 0; right: 3px; font-size: 0.7rem; }
+.nav-btn.flagged::after { content: "\2691"; position: absolute; top: 1px; right: 3px; font-size: 0.7rem; line-height: 1; }
 .nav-btn.current { border-width: 4px; border-color: var(--text); }
 .nav-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
