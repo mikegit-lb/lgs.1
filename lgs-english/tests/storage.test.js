@@ -3,6 +3,7 @@ import {
   saveSession, loadSession, clearSession, loadProgress, saveProgress,
   markStudied, recordPractice, recordExam,
 } from '../src/lib/storage.js';
+import { EXAM_QUESTIONS } from '../src/data/examQuestions.js';
 
 const SK = 'lgs-english:lesson1:session';
 const PK = 'lgs-english:lesson1:progress';
@@ -15,7 +16,7 @@ class Fake {
 const boom = () => { throw new Error('boom'); };
 const badGet = { getItem: boom, setItem: boom, removeItem: boom };
 const exam = (o = {}) => ({
-  questions: [], answers: Array(10).fill(null), flagged: Array(10).fill(false),
+  questions: EXAM_QUESTIONS.slice(0, 10), answers: Array(10).fill(null), flagged: Array(10).fill(false),
   current: 0, submitted: false, ...o,
 });
 const DEF = { studied: [], practice: {}, bestExam: null };
@@ -38,6 +39,14 @@ describe('session', () => {
     expect(loadSession(5000, s)).toBeNull();
     expect(s.getItem(SK)).toBeNull();
   });
+  it('far-future deadline -> null and cleared', () => {
+    const s = new Fake();
+    saveSession({ exam: exam(), deadlineMs: 900 * 1000 + 1 }, s);
+    expect(loadSession(0, s)).toBeNull();
+    expect(s.getItem(SK)).toBeNull();
+    saveSession({ exam: exam(), deadlineMs: 900 * 1000 }, s);
+    expect(loadSession(0, s)).not.toBeNull();
+  });
   it('submitted -> null and cleared', () => {
     const s = new Fake();
     saveSession({ exam: exam({ submitted: true }), deadlineMs: 5000 }, s);
@@ -51,6 +60,12 @@ describe('session', () => {
       { exam: exam({ current: -1 }), deadlineMs: 5000 },
       { exam: exam({ answers: Array(10).fill(4) }), deadlineMs: 5000 },
       { exam: exam({ answers: Array(10).fill('a') }), deadlineMs: 5000 },
+      { exam: exam({ questions: [] }), deadlineMs: 5000 },
+      { exam: exam({ questions: EXAM_QUESTIONS.slice(0, 9) }), deadlineMs: 5000 },
+      { exam: exam({ flagged: Array(9).fill(false) }), deadlineMs: 5000 },
+      { exam: exam({ flagged: Array(10).fill(0) }), deadlineMs: 5000 },
+      { exam: exam({ submitted: undefined }), deadlineMs: 5000 },
+      { exam: exam({ submitted: 'no' }), deadlineMs: 5000 },
       { exam: exam(), deadlineMs: 'x' },
       { exam: null, deadlineMs: 5000 },
       [], 5, null,
@@ -101,6 +116,17 @@ describe('progress', () => {
     saveProgress(p, s);
     expect(loadProgress(s)).toEqual(p);
   });
+  it('drops out-of-range progress values', () => {
+    const s = new Fake();
+    for (const b of [11, -1, 2.5]) {
+      s.setItem(PK, JSON.stringify({ bestExam: b }));
+      expect(loadProgress(s).bestExam).toBeNull();
+    }
+    s.setItem(PK, JSON.stringify({ bestExam: 0, practice: {
+      1: { correct: 6, total: 5 }, 2: { correct: -1, total: 5 }, 3: { correct: 1, total: 0 },
+      4: { correct: 1, total: 11 }, 5: { correct: 1.5, total: 5 }, 6: { correct: 0, total: 10 } } }));
+    expect(loadProgress(s)).toEqual({ studied: [], practice: { 6: { correct: 0, total: 10 } }, bestExam: 0 });
+  });
   it('sanitises', () => {
     const s = new Fake();
     s.setItem(PK, JSON.stringify({
@@ -129,6 +155,14 @@ describe('pure helpers', () => {
     expect(recordPractice(p, 2, { correct: 5, total: 5 }).practice[2].correct).toBe(5);
     expect(DEF.practice).toEqual({});
     expect(recordPractice(DEF, 99, { correct: 1, total: 1 })).toEqual(DEF);
+  });
+  it('rejects invalid scores', () => {
+    for (const sc of [{ correct: NaN, total: 5 }, { correct: 6, total: 5 }, { correct: -1, total: 5 },
+      { correct: 1, total: 0 }, { correct: 1.5, total: 5 }, { correct: 1, total: 11 }, null, {}]) {
+      expect(recordPractice(DEF, 2, sc)).toBe(DEF);
+    }
+    for (const c of [NaN, -1, 11, 2.5, '3', undefined, Infinity]) expect(recordExam(DEF, c)).toBe(DEF);
+    expect(recordExam(DEF, 0).bestExam).toBe(0);
   });
   it('recordExam keeps best', () => {
     const p = recordExam(DEF, 6);

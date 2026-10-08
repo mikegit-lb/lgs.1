@@ -45,6 +45,18 @@ describe('createCountdown', () => {
   it('expires immediately if deadline already passed', () => {
     const f = fake(1000, 5000);
     expect(f.onExpire).toHaveBeenCalledTimes(1);
+    expect(f.onTick).not.toHaveBeenCalled();
+    expect(f.isCleared()).toBe(true);
+  });
+  it('first immediate tick reports remaining seconds', () => {
+    const f = fake(3500);
+    expect(f.onTick).toHaveBeenCalledTimes(1);
+    expect(f.onTick).toHaveBeenCalledWith(3);
+  });
+  it('stop twice is safe', () => {
+    const f = fake(3000);
+    f.cd.stop();
+    expect(() => f.cd.stop()).not.toThrow();
   });
   it('stop silences', () => {
     const f = fake(3000);
@@ -53,5 +65,20 @@ describe('createCountdown', () => {
     f.tick(5000);
     expect(f.onExpire).not.toHaveBeenCalled();
     expect(f.onTick).not.toHaveBeenCalled();
+  });
+});
+
+describe('default store getter', () => {
+  it('throwing localStorage getter yields safe behaviour', async () => {
+    const { loadSession, loadProgress, saveSession } = await import('../src/lib/storage.js');
+    const orig = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw new Error('denied'); } });
+    try {
+      expect(loadSession()).toBeNull();
+      expect(loadProgress()).toEqual({ studied: [], practice: {}, bestExam: null });
+      expect(() => saveSession({}, undefined)).not.toThrow();
+    } finally {
+      if (orig) Object.defineProperty(globalThis, 'localStorage', orig); else delete globalThis.localStorage;
+    }
   });
 });
