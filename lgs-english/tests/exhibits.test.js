@@ -69,7 +69,7 @@ describe('hardening', () => {
   });
   it('gap has accessible blank text and keeps underscores', () => {
     const el = renderExhibit({ kind: 'dialogue', lines: [{ speaker: 'A', text: 'x _____ y' }] });
-    expect(el.querySelector('.gap .visually-hidden').textContent).toBe('blank');
+    expect(el.querySelector('.gap .visually-hidden').textContent).toBe('boşluk');
     expect(el.querySelector('.gap [aria-hidden="true"]').textContent).toBe('_____');
   });
   it('script/b payloads create no elements', () => {

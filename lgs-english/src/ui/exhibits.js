@@ -7,7 +7,7 @@ function withGap(text) {
   const parts = String(text).split(GAP);
   const out = [];
   parts.forEach((part, i) => {
-    if (i > 0) out.push(h('span', { class: 'gap' }, h('span', { class: 'visually-hidden' }, 'blank'), h('span', { 'aria-hidden': 'true' }, GAP)));
+    if (i > 0) out.push(h('span', { class: 'gap' }, h('span', { class: 'visually-hidden', lang: 'tr' }, 'boşluk'), h('span', { 'aria-hidden': 'true' }, GAP)));
     if (part) out.push(part);
   });
   return out;

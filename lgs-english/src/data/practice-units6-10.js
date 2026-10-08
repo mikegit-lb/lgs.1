@@ -71,7 +71,7 @@ export const PRACTICE_UNITS_6_10 = [
       lines: [
         { speaker: 'Tourist', text: 'Excuse me. _____' },
         { speaker: 'Local', text: 'Go straight along this street and turn right at the bank. The museum is opposite the park.' },
-        { speaker: 'Tourist', text: 'Thank you very much for the directions!' },
+        { speaker: 'Tourist', text: 'Thanks for the directions!' },
       ],
     },
     options: [
@@ -245,12 +245,12 @@ export const PRACTICE_UNITS_6_10 = [
     id: 'p9-3',
     unit: 9,
     type: 'vocabulary',
-    stem: 'Thomas Edison was a famous _____. He created more than a thousand new devices, such as the phonograph.\n\nWhich word fits the blank?',
+    stem: 'Thomas Edison was a famous _____. He had more than a thousand patents for inventions such as the phonograph and the light bulb.\n\nWhich word fits the blank?',
     exhibit: null,
     options: ['astronaut', 'inventor', 'explorer', 'athlete'],
     answer: 1,
     explanationTr:
-      'Binden fazla yeni alet yaratan kişi bir mucittir; bu yüzden doğru kelime "inventor" (mucit) olur. "Astronaut" (astronot) uzaya giden, "explorer" (kâşif) yeni yerler keşfeden, "athlete" (sporcu) ise spor yapan kişidir.',
+      'Binden fazla buluş patenti olan kişi bir mucittir; bu yüzden doğru kelime "inventor" (mucit) olur. "Astronaut" (astronot) uzaya giden, "explorer" (kâşif) yeni yerler keşfeden, "athlete" (sporcu) ise spor yapan kişidir.',
   },
 
   // ---------- Unit 10: Natural Forces ----------

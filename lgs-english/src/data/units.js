@@ -48,6 +48,7 @@ export const UNITS = [
         { speaker: 'Elif', text: 'My phone was dead. I apologise. It won\'t happen again.' },
         { speaker: 'Deniz', text: "Never mind. It's OK. You're still my best friend." },
         { speaker: 'Elif', text: 'Thanks. Let me buy you an ice cream this weekend!' },
+        { speaker: 'Deniz', text: 'Great! Ice cream is better than cake anyway.' },
       ],
     },
     tipTr:
@@ -251,7 +252,7 @@ export const UNITS = [
     ],
     phrases: [
       'It was the most thrilling day of my life!',
-      "I'd rather go rafting than paragliding.",
+      "I'd rather go rafting than go paragliding.",
       'We got lost in the forest.',
       'What a terrible trip!',
     ],
@@ -367,7 +368,7 @@ export const UNITS = [
         "In my family, everybody has a responsibility at home. My mum does the laundry and my dad cooks dinner. My little sister is too young to use the vacuum cleaner, but she is old enough to water the plants. I have to make my bed every morning and do the washing-up after dinner. At the weekend we all tidy up the house together. I don't love chores, but sharing them is fair.",
     },
     tipTr:
-      'Tablolu ev işi sorularında "who" sorusu gelirse satırı, "how often" sorusu gelirse sütunu dikkatle oku; tek bir yanlış satır bütün cevabı değiştirir.',
+      'Önce tablonun/grafiğin başlıklarını oku (satırlar ve sütunlar neyi gösteriyor?), sonra her seçeneği veriyle tek tek karşılaştır.',
   },
   {
     id: 9,

@@ -176,7 +176,7 @@ export const EXAM_QUESTIONS = [
     ],
     answer: 3,
     explanationTr:
-      'Grafiğe göre annem haftada 12, Burak 3 saat ev işi yapıyor; 12 saat, 3 saatin dört katıdır (D). Burak (3) Elif\'ten (5) az çalışır (A yanlış); en çok çalışan babam değil annemdir (B yanlış); Elif ve Burak toplam 8 saat çalışır, bu da babamın 9 saatinden azdır (C yanlış).',
+      'Grafiğe göre anne haftada 12, Burak 3 saat ev işi yapıyor; 12 saat, 3 saatin dört katıdır (D). Burak (3) Elif\'ten (5) az çalışır (A yanlış); en çok çalışan baba değil annedir (B yanlış); Elif ve Burak toplam 8 saat çalışır, bu da babanın 9 saatinden azdır (C yanlış).',
   },
   {
     id: 'e9',

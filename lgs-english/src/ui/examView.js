@@ -131,7 +131,7 @@ export function examView(ctx, arg = {}) {
         h('button', { type: 'button', class: 'btn btn-secondary flag-btn', 'aria-pressed': String(state.flagged[i]), onclick: () => update(toggleFlag(state, i), '.flag-btn') }, state.flagged[i] ? 'Bayrağı kaldır' : 'Bayrakla'),
         h('button', { type: 'button', class: 'btn btn-secondary clear-btn', disabled: state.answers[i] === null, onclick: clearAnswer }, 'Cevabı temizle'),
         h('button', { type: 'button', class: 'btn btn-primary submit-btn', onclick: openDialog }, 'Sınavı bitir'),
-        h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => ctx.go('home') }, 'Ana sayfaya dön (ilerlemen kaydedilir)'),
+        h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => ctx.go('home') }, 'Ana sayfaya dön (ilerlemen kaydedilir, süre işlemeye devam eder)'),
       ),
     );
     if (focusSel) {
