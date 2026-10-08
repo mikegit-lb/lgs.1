@@ -1,3 +1,4 @@
+import './styles.css';
 import { UNITS } from './data/units.js';
 
 // Placeholder entry point; the real UI arrives in later tasks.
