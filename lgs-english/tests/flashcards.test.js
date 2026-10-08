@@ -62,4 +62,18 @@ describe('renderFlashcards', () => {
     expect(el).toBeInstanceOf(HTMLElement);
     expect(el.querySelector('.flashcard')).toBeNull();
   });
+  it('script/b payload renders as text', () => {
+    const el = renderFlashcards([{ en: '<script>1</script><b>x</b>', tr: 't' }]);
+    expect(el.querySelector('script')).toBeNull();
+    expect(el.querySelector('b')).toBeNull();
+  });
+  it('focus moves to card when focused button becomes disabled', () => {
+    const el = renderFlashcards(WORDS);
+    document.body.appendChild(el);
+    btn(el, 'Next').click();
+    btn(el, 'Next').focus();
+    btn(el, 'Next').click();
+    expect(document.activeElement).toBe(card(el));
+    el.remove();
+  });
 });

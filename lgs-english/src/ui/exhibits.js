@@ -7,7 +7,7 @@ function withGap(text) {
   const parts = String(text).split(GAP);
   const out = [];
   parts.forEach((part, i) => {
-    if (i > 0) out.push(h('span', { class: 'gap', 'aria-label': 'blank' }, GAP));
+    if (i > 0) out.push(h('span', { class: 'gap' }, h('span', { class: 'visually-hidden' }, 'blank'), h('span', { 'aria-hidden': 'true' }, GAP)));
     if (part) out.push(part);
   });
   return out;
@@ -35,7 +35,7 @@ function dialogue(ex) {
 function table(ex) {
   return h(
     'div',
-    { class: 'exhibit exhibit-table table-scroll' },
+    { class: 'exhibit exhibit-table table-scroll', tabindex: '0', role: 'region', 'aria-label': ex.caption },
     h(
       'table',
       null,
@@ -48,7 +48,7 @@ function table(ex) {
 
 function barChart(ex) {
   const bars = ex.bars;
-  const max = Math.max(0, ...bars.map((b) => Number(b.value) || 0));
+  const max = Math.max(0, ...bars.map((b) => num(b.value)));
   const W = 360;
   const H = 220;
   const top = 28;
@@ -60,7 +60,7 @@ function barChart(ex) {
   const base = top + plotH;
 
   const marks = bars.map((b, i) => {
-    const v = Number(b.value) || 0;
+    const v = num(b.value);
     const bh = max > 0 ? (v / max) * plotH : 0;
     const x = i * slot + (slot - barW) / 2;
     const cx = x + barW / 2;
@@ -98,6 +98,11 @@ function barChart(ex) {
     chart,
     alt,
   );
+}
+
+function num(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(0, n) : 0;
 }
 
 function round(n) {

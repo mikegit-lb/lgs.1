@@ -8,6 +8,8 @@ function applyAttrs(el, attrs) {
     else if (key === 'text') el.textContent = String(value);
     else if (/^on[a-z]/.test(key) && typeof value === 'function') {
       el.addEventListener(key.slice(2), value);
+    } else if (/^on/i.test(key)) {
+      continue; // never turn non-function on* values into inline handlers
     } else if (value === true) el.setAttribute(key, '');
     else el.setAttribute(key, String(value));
   }

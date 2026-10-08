@@ -36,6 +36,7 @@ export function renderFlashcards(words) {
     index = n;
     flipped = false;
     paint(true);
+    if (document.activeElement && document.activeElement.disabled) cardBtn.focus();
   }
 
   cardBtn.addEventListener('click', () => {

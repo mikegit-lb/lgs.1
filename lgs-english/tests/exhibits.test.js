@@ -43,6 +43,49 @@ describe('h helper', () => {
   });
 });
 
+describe('hardening', () => {
+  it('non-function on* values are not set as attributes', () => {
+    const el = h('div', { onclick: 'alert(1)', onmouseover: 5 });
+    expect(el.hasAttribute('onclick')).toBe(false);
+    expect(el.hasAttribute('onmouseover')).toBe(false);
+  });
+  it('negative / non-finite values clamp to zero height', () => {
+    const el = renderExhibit({ kind: 'barChart', title: 'T', unitLabel: 'u', bars: [{ label: 'A', value: -5 }, { label: 'B', value: NaN }, { label: 'C', value: 4 }] });
+    const hs = [...el.querySelectorAll('rect')].map((r) => Number(r.getAttribute('height')));
+    expect(hs[0]).toBe(0);
+    expect(hs[1]).toBe(0);
+    expect(hs[2]).toBeGreaterThan(0);
+  });
+  it('bar heights are proportional', () => {
+    const el = renderExhibit({ kind: 'barChart', title: 'T', unitLabel: 'u', bars: [{ label: 'A', value: 10 }, { label: 'B', value: 20 }] });
+    const hs = [...el.querySelectorAll('rect')].map((r) => Number(r.getAttribute('height')));
+    expect(hs[1]).toBeCloseTo(hs[0] * 2, 1);
+  });
+  it('table wrapper is keyboard-scrollable region', () => {
+    const el = renderExhibit({ kind: 'table', caption: 'Cap', headers: ['A'], rows: [['1']] });
+    expect(el.getAttribute('tabindex')).toBe('0');
+    expect(el.getAttribute('role')).toBe('region');
+    expect(el.getAttribute('aria-label')).toBe('Cap');
+  });
+  it('gap has accessible blank text and keeps underscores', () => {
+    const el = renderExhibit({ kind: 'dialogue', lines: [{ speaker: 'A', text: 'x _____ y' }] });
+    expect(el.querySelector('.gap .visually-hidden').textContent).toBe('blank');
+    expect(el.querySelector('.gap [aria-hidden="true"]').textContent).toBe('_____');
+  });
+  it('script/b payloads create no elements', () => {
+    const P = '<script>alert(1)</script><b>x</b>';
+    const els = [
+      renderExhibit({ kind: 'passage', text: P }),
+      renderExhibit({ kind: 'table', caption: 'c', headers: ['h'], rows: [[P]] }),
+    ];
+    for (const el of els) {
+      expect(el.querySelector('script')).toBeNull();
+      expect(el.querySelector('b')).toBeNull();
+      expect(el.textContent).toContain(P);
+    }
+  });
+});
+
 describe('renderExhibit', () => {
   it('passage', () => {
     const el = renderExhibit({ kind: 'passage', title: 'T', text: 'Body text.' });

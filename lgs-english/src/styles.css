@@ -87,8 +87,11 @@ p { margin: 0 0 0.75em; }
 .option.selected .letter { color: var(--primary-text); background: var(--primary); }
 .option.correct { border-color: var(--correct); background: var(--correct-bg); }
 .option.correct .letter { color: #fff; background: var(--correct); }
+.option.correct .letter::after { content: '¹3'; }
 .option.incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); }
+.option.incorrect { border-style: dashed; }
 .option.incorrect .letter { color: #fff; background: var(--incorrect); }
+.option.incorrect .letter::after { content: '¹7'; }
 
 /* Question navigation strip */
 .nav-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
@@ -98,9 +101,13 @@ p { margin: 0 0 0.75em; }
   background: var(--surface); border: 2px solid var(--border); border-radius: 8px;
   cursor: pointer;
 }
+.nav-btn { position: relative; }
 .nav-btn.answered { background: #e0e7ff; border-color: var(--primary); }
+.nav-btn.answered::after { content: '¹3'; position: absolute; top: 0; right: 3px; font-size: 0.7rem; }
 .nav-btn.flagged { background: var(--flag-bg); border-color: var(--flag); color: var(--flag); }
-.nav-btn.current { outline: 3px solid var(--text); outline-offset: 1px; }
+.nav-btn.flagged::after { content: '91'; position: absolute; top: 0; right: 3px; font-size: 0.7rem; }
+.nav-btn.current { border-width: 4px; border-color: var(--text); }
+.nav-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 /* Timer and progress */
 .timer { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.125rem; }
