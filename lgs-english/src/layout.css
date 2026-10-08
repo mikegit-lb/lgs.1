@@ -22,7 +22,8 @@ h1:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .brand-logo { display: inline-flex; width: 40px; height: 44px; padding: 2px; background: #fff; border-radius: 12px; }
 .brand-logo svg { width: 100%; height: 100%; }
 .xp-chip { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; font-weight: 700; font-size: 0.9rem; }
-.chip-part { padding: 4px 12px; background: rgba(17, 12, 60, 0.35); border-radius: 999px; white-space: nowrap; }
+.chip-part { display: inline-flex; align-items: center; gap: 2px;
+  min-height: 32px; padding: 4px 12px; background: rgba(17, 12, 60, 0.35); border-radius: 999px; white-space: nowrap; }
 .home-link { background: #fff; color: var(--primary); }
 .home-link:hover:not(:disabled) { background: #eef2ff; }
 .home-link[aria-current="page"] { box-shadow: inset 0 0 0 2px var(--primary); }
@@ -135,7 +136,10 @@ h1:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .unit-number { font-size: 0.9rem; font-weight: 800; margin: 0 0 4px; color: var(--muted); }
 
 /* Exam: question column + sticky side panel (>= 960px). */
-.exam-layout { display: grid; gap: 20px; }
+.exam-layout { display: grid; gap: 20px; grid-template-areas: "timer" "q" "side"; }
+.exam-layout > .timer-pill { grid-area: timer; }
+.exam-question-col { grid-area: q; }
+.exam-side { grid-area: side; }
 .exam-header { display: flex; align-items: center; gap: 10px; }
 .exam-header h1 { margin: 0; }
 .exam-trophy { font-size: 2rem; }
@@ -203,12 +207,26 @@ h1:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 }
 
 @media (min-width: 960px) {
-  .exam-layout { grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
-  .exam-side { position: sticky; top: 84px; }
+  .exam-layout { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: auto 1fr; grid-template-areas: "q timer" "q side"; align-items: start; row-gap: 12px; }
+  .exam-layout > .timer-pill { position: sticky; top: 84px; z-index: 5; margin: 0; }
+  .exam-side { position: sticky; top: 148px; }
 }
 
 /* Small screens: the timer floats so it stays visible while answering. */
 @media (max-width: 959.98px) {
-  .screen[data-screen="exam"] { padding-bottom: 72px; }
-  .timer-pill { position: fixed; z-index: 40; right: 12px; bottom: 12px; margin: 0; box-shadow: var(--shadow-lg); }
+    .exam-layout { gap: 12px; }
+  .exam-layout > .timer-pill { position: sticky; top: 0; z-index: 30; margin: 0 -4px; padding: 8px 12px; border-radius: 0 0 16px 16px; box-shadow: var(--shadow); }
+}
+
+/* Phones: one compact header row (<= ~64px); chip/home labels stay available to assistive tech. */
+@media (max-width: 599.98px) {
+  .header-inner { flex-wrap: nowrap; gap: 6px; padding: 6px 10px; }
+  .brand { gap: 6px; font-size: 1rem; min-width: 0; }
+  .brand-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-logo { width: 34px; height: 38px; flex: none; }
+  .xp-chip { flex-wrap: nowrap; gap: 4px; font-size: 0.8rem; }
+  .chip-part { padding: 2px 8px; }
+  .chip-label, .home-label { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+    overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+  .home-link { flex: none; min-width: 44px; padding: 6px 10px; }
 }

@@ -48,6 +48,24 @@ describe('redesign stylesheets', () => {
     expect(block).toMatch(/transition:\s*none\s*!important/);
     expect(block).toMatch(/\.confetti\s*\{\s*display:\s*none/);
   });
+  it('mobile exam timer is a sticky strip, never position:fixed over the options', () => {
+    const layout = files[1][1];
+    const mobile = layout.slice(layout.indexOf('@media (max-width: 959.98px)'));
+    const block = /\.exam-layout > \.timer-pill\s*\{([^}]*)\}/.exec(mobile);
+    expect(block).not.toBeNull();
+    expect(block[1]).toMatch(/position:\s*sticky/);
+    expect(block[1]).toMatch(/top:\s*0/);
+    expect(layout).not.toMatch(/timer-pill[^{]*\{[^}]*position:\s*fixed/);
+  });
+  it('phone header hides chip/home labels visually only (clip, not display:none)', () => {
+    const layout = files[1][1];
+    const phone = layout.slice(layout.indexOf('@media (max-width: 599.98px)'));
+    const rule = /\.chip-label, \.home-label\s*\{([^}]*)\}/.exec(phone);
+    expect(rule).not.toBeNull();
+    expect(rule[1]).toMatch(/clip/);
+    expect(rule[1]).not.toMatch(/display:\s*none/);
+    expect(phone).toMatch(/\.home-link\s*\{[^}]*min-width:\s*44px/);
+  });
   it('defines a theme for every unit 1..10', () => {
     const themes = files[2][1];
     for (let i = 1; i <= 10; i++) expect(themes).toMatch(new RegExp(`\\[data-unit="${i}"\\]\\s*\\{[^}]*--u-deep`));

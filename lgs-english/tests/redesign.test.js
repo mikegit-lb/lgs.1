@@ -124,7 +124,7 @@ describe('Exam redesign', () => {
     click(s.root, 'Sınava başla');
     const side = s.root.querySelector('.exam-side');
     expect(side.querySelector('.nav-strip')).not.toBeNull();
-    expect(side.querySelector('[role="timer"]')).not.toBeNull();
+    expect(s.root.querySelector('.exam-layout > .timer-pill [role="timer"]')).not.toBeNull();
     const bar = () => s.root.querySelector('.answered-progress');
     expect(bar().textContent).toContain('Cevaplanan 0/10');
     options(s.root)[0].click();

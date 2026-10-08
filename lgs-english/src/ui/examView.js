@@ -65,6 +65,7 @@ export function examView(ctx, arg = {}) {
     h(
       'div',
       { class: 'exam-layout' },
+      timerPill,
       h(
         'div',
         { class: 'exam-question-col' },
@@ -77,7 +78,7 @@ export function examView(ctx, arg = {}) {
         h('p', { class: 'exam-note' }, '3 yanlış cevap 1 doğru cevabı götürür. Boş bıraktığın sorular puanını etkilemez.'),
         body,
       ),
-      h('aside', { class: 'exam-side', 'aria-label': 'Sınav paneli' }, timerPill, side),
+      h('aside', { class: 'exam-side', 'aria-label': 'Sınav paneli' }, side),
     ),
   );
   const el = screenRoot('exam', main, live);
