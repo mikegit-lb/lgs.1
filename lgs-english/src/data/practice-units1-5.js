@@ -22,13 +22,13 @@ export const PRACTICE_UNITS_1_5 = [
       lines: [
         { speaker: 'Burak', text: 'Hey Ece, did you bring my book back?' },
         { speaker: 'Ece', text: 'Yes, here it is. _____ I spilled some juice on the cover by mistake.' },
-        { speaker: 'Burak', text: "Oh no! Well, don't worry about it. Accidents happen." },
+        { speaker: 'Burak', text: "Oh no! Well, it's OK. I can clean it." },
       ],
     },
     options: ['I apologise, Burak.', 'Congratulations, Burak!', 'Never mind, Burak.', "You're welcome, Burak."],
     answer: 0,
     explanationTr:
-      'Ece kitabın kapağına yanlışlıkla meyve suyu döktüğünü söylüyor, Burak da "Don\'t worry about it" diyerek özrü kabul ediyor. Bu yüzden boşluğa bir özür cümlesi gelir: "I apologise, Burak." "Never mind" özür dileyen kişinin değil, özrü kabul eden kişinin söylediği bir ifadedir.',
+      'Ece kitabın kapağına yanlışlıkla meyve suyu döktüğünü söylüyor, Burak da "Well, it\'s OK" diyerek özrü kabul ediyor. Bu yüzden boşluğa bir özür cümlesi gelir: "I apologise, Burak." "Never mind" özür dileyen kişinin değil, özrü kabul eden kişinin söylediği bir ifadedir.',
   },
   {
     id: 'p1-3',
@@ -88,7 +88,7 @@ export const PRACTICE_UNITS_1_5 = [
       kind: 'passage',
       title: "Barış's Week",
       text:
-        'Barış is fifteen, and his weekdays are very busy. He always gets up at 6:30 and catches the school bus at 7:15. After school, he usually goes to a football course for two hours. He often does his homework after dinner, and he rarely watches TV on weekdays. At the weekend, things are different. He sometimes sleeps until ten and hangs out with his cousins. However, he never plays computer games before he finishes his homework.',
+        'Barış is fourteen, and his weekdays are very busy. He always gets up at 6:30 and catches the school bus at 7:15. After school, he usually goes to a football course for two hours. He often does his homework after dinner, and he rarely watches TV on weekdays. At the weekend, things are different. He sometimes sleeps until ten and hangs out with his cousins. However, he never plays computer games before he finishes his homework.',
     },
     options: [
       'He watches TV every evening on weekdays.',
@@ -157,7 +157,7 @@ export const PRACTICE_UNITS_1_5 = [
     options: [
       "No, we don't have any milk.",
       'Yes, there are some in the fridge.',
-      'Yes, there is much sugar in the cupboard.',
+      'Yes, there is some sugar in the cupboard.',
       "No, I can't cook today.",
     ],
     answer: 1,
@@ -266,7 +266,7 @@ export const PRACTICE_UNITS_1_5 = [
     ],
     answer: 2,
     explanationTr:
-      'Metin, Efe\'nin internette kötü yorumlara maruz kalmasını ve kız kardeşi ile öğretmeninin yardımıyla bu siber zorbalıkla nasıl başa çıktığını anlatıyor (C). Kıyafet seçmek, interneti tamamen bırakmak ya da ablasının öğretmen olması metinde geçmez.',
+      'Metin, Efe\'nin internette kötü yorumlara maruz kalmasını ve kız kardeşi ile öğretmeninin yardımıyla bu siber zorbalıkla nasıl başa çıktığını anlatıyor (C). Kıyafet seçmek, interneti tamamen bırakmak ya da kız kardeşinin öğretmen olması metinde geçmez.',
   },
   {
     id: 'p5-2',
@@ -285,14 +285,14 @@ export const PRACTICE_UNITS_1_5 = [
       ],
     },
     options: [
-      'People aged 16–18 spend three times as many hours online as children aged 10–12.',
+      'People aged 16–18 spend 4 hours more online than children aged 10–12.',
       'The 19–25 age group spends the most time online.',
       'People aged 13–15 spend more time online than people aged 19–25.',
       'Children aged 10–12 spend half as much time online as people aged 19–25.',
     ],
     answer: 0,
     explanationTr:
-      '16–18 yaş grubu günde 6 saat, 10–12 yaş grubu 2 saat internette; 6, 2\'nin üç katıdır, yani A doğrudur. En çok zaman geçiren grup 19–25 değil 16–18\'dir (B yanlış); 13–15 yaş grubu 4 saatle 19–25\'ten (5 saat) daha az zaman geçirir (C yanlış); 2 saat, 5 saatin yarısı değildir (D yanlış).',
+      '16–18 yaş grubu günde 6 saat, 10–12 yaş grubu 2 saat internette; aradaki fark 6 − 2 = 4 saattir, yani A doğrudur. En çok zaman geçiren grup 19–25 değil 16–18\'dir (B yanlış); 13–15 yaş grubu 4 saatle 19–25\'ten (5 saat) daha az zaman geçirir (C yanlış); 2 saat, 5 saatin yarısı değildir (D yanlış).',
   },
   {
     id: 'p5-3',
@@ -303,6 +303,6 @@ export const PRACTICE_UNITS_1_5 = [
     options: ['download', 'share', 'follow', 'block'],
     answer: 3,
     explanationTr:
-      'Tanımadığın birinin seninle bir daha iletişim kurmasını engellemek için onu "block" (engellemek) etmelisin. "Download" (indirmek) ve "share" (paylaşmak) bu durumla ilgisizdir; "follow" (takip etmek) ise tam tersine o kişiyle bağlantıyı artırır.',
+      'Tanımadığın birinin seninle bir daha iletişim kurmasını engellemek için onu engellemelisin ("block"). "Download" (indirmek) ve "share" (paylaşmak) bu durumla ilgisizdir; "follow" (takip etmek) ise tam tersine o kişiyle bağlantıyı artırır.',
   },
 ];
