@@ -6,14 +6,14 @@ const PRACTICE_COUNTS = { paragraph: 8, visual: 8, dialogue: 7, vocabulary: 7 };
 
 const countTypes = (qs) => {
   const c = Object.fromEntries(TYPES.map((t) => [t, 0]));
-  for (const q of qs) if (q.type in c) c[q.type] += 1;
+  for (const q of qs) if (q && q.type in c) c[q.type] += 1;
   return c;
 };
 const countsDiffer = (qs, want) => {
   const got = countTypes(qs);
   return TYPES.some((t) => got[t] !== want[t]) ? got : null;
 };
-const passageText = (q) => (q.exhibit && q.exhibit.kind === 'passage' ? q.exhibit.text : null);
+const passageText = (q) => (q && q.exhibit && q.exhibit.kind === 'passage' ? q.exhibit.text : null);
 
 // --- per-question rules ---
 const checkOptionCount = (q) =>
@@ -48,41 +48,61 @@ const QUESTION_RULES = [checkOptionCount, checkAnswer, checkDuplicateOptions, ch
   checkExhibitPresent, checkDialogue, checkBarChart, checkTable];
 
 export function validateQuestion(q) {
-  return QUESTION_RULES.flatMap((r) => r(q));
+  if (!q || typeof q !== 'object') return ['malformed question: not an object'];
+  return QUESTION_RULES.flatMap((r) => {
+    try {
+      return r(q);
+    } catch (e) {
+      return [`malformed question: ${e.message}`];
+    }
+  });
 }
 
 const questionProblems = (qs) =>
-  qs.flatMap((q) => validateQuestion(q).map((p) => `${q.id}: ${p}`));
+  qs.flatMap((q, i) => validateQuestion(q).map((p) => `${q && q.id !== undefined ? q.id : `#${i + 1}`}: ${p}`));
+
+const duplicateIds = (qs) => {
+  const seen = new Set();
+  const out = [];
+  for (const q of qs) {
+    if (!q) continue;
+    if (seen.has(q.id)) out.push(`duplicate id ${q.id}`);
+    seen.add(q.id);
+  }
+  return out;
+};
 
 // --- exam rules ---
 export function validateExam(qs) {
+  if (!Array.isArray(qs)) return ['exam must be an array of questions'];
   if (qs.length !== 10) return [`exam must have exactly 10 questions (got ${qs.length})`];
   const out = [];
-  if (!qs.every((q, i) => q.unit === i + 1)) out.push('exam unit order must be 1..10');
+  if (!qs.every((q, i) => q && q.unit === i + 1)) out.push('exam unit order must be 1..10');
   const bad = countsDiffer(qs, EXAM_COUNTS);
   if (bad) out.push(`exam type counts must be paragraph 3, visual 3, dialogue 2, vocabulary 2 (got ${JSON.stringify(bad)})`);
-  return [...out, ...questionProblems(qs)];
+  return [...out, ...duplicateIds(qs), ...questionProblems(qs)];
 }
 
 // --- practice rules ---
 export function validatePractice(qs, exam) {
+  if (!Array.isArray(qs)) return ['practice must be an array of questions'];
   const out = [];
+  if (!Array.isArray(exam)) {
+    out.push('exam must be an array of questions');
+    exam = [];
+  }
   if (qs.length !== 30) out.push(`practice must have exactly 30 questions (got ${qs.length})`);
   for (let u = 1; u <= 10; u++) {
-    const drills = qs.filter((q) => q.unit === u);
+    const drills = qs.filter((q) => q && q.unit === u);
     if (drills.length !== 3) out.push(`unit ${u} must have 3 drills (got ${drills.length})`);
     else if (new Set(drills.map((d) => d.type)).size < 2) out.push(`unit ${u} needs at least 2 distinct drill types`);
   }
   const bad = countsDiffer(qs, PRACTICE_COUNTS);
   if (bad) out.push(`practice type counts must be paragraph 8, visual 8, dialogue 7, vocabulary 7 (got ${JSON.stringify(bad)})`);
-  const seen = new Set();
-  for (const q of [...exam, ...qs]) {
-    if (seen.has(q.id)) out.push(`duplicate id ${q.id}`);
-    seen.add(q.id);
-  }
-  const stems = new Set(exam.map((q) => q.stem));
+  out.push(...duplicateIds([...exam, ...qs]));
+  const stems = new Set(exam.filter(Boolean).map((q) => q.stem));
   const passages = new Set(exam.map(passageText).filter(Boolean));
-  for (const q of qs) {
+  for (const q of qs.filter(Boolean)) {
     if (stems.has(q.stem)) out.push(`${q.id}: practice repeats exam stem`);
     const p = passageText(q);
     if (p && passages.has(p)) out.push(`${q.id}: practice repeats exam passage`);

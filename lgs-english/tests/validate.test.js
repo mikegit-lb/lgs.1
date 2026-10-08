@@ -72,6 +72,47 @@ describe('validateQuestion', () => {
   }, 'table row'));
 });
 
+describe('exhibit kinds and malformed input', () => {
+  it('accepts valid barChart (with a zero bar) and poster', () => {
+    const b = mk('b', 1, 'visual');
+    b.exhibit = { kind: 'barChart', title: 't', unitLabel: 'u', bars: [{ label: 'a', value: 0 }, { label: 'b', value: 3.5 }] };
+    const po = mk('po', 1, 'visual');
+    po.exhibit = { kind: 'poster', heading: 'h', lines: ['x', 'y'] };
+    expect(validateQuestion(b)).toEqual([]);
+    expect(validateQuestion(po)).toEqual([]);
+  });
+  it('rejects gap in a line AND in the stem', () => {
+    const q = mk('d', 1, 'dialogue');
+    q.stem = 'Fill _____';
+    expect(has(validateQuestion(q), 'dialogue gap')).toBe(true);
+  });
+  const nonEmpty = (f) => { let r; expect(() => { r = f(); }).not.toThrow(); expect(r.length).toBeGreaterThan(0); };
+  const dlg = (ex) => { const q = mk('d', 1, 'dialogue'); q.exhibit = ex; return q; };
+  const vis = (ex) => { const q = mk('v', 1, 'visual'); q.exhibit = ex; return q; };
+  it('validateQuestion never throws', () => {
+    for (const q of [null, undefined, 5,
+      dlg({ kind: 'dialogue' }), dlg({ kind: 'dialogue', lines: [null] }), dlg({ kind: 'dialogue', lines: [{ speaker: 'A' }] }),
+      vis({ kind: 'barChart', title: 't', unitLabel: 'u' }), vis({ kind: 'barChart', bars: [null] }),
+      vis({ kind: 'table', caption: 'c', rows: [] }), vis({ kind: 'table', headers: ['A'] }), vis({ kind: 'table', headers: ['A'], rows: [null] }),
+      { ...mk('x', 1, 'paragraph'), options: null }]) nonEmpty(() => validateQuestion(q));
+  });
+  it('validateExam never throws', () => {
+    for (const e of [null, undefined, 'x', [null], [...exam().slice(0, 9), null]]) nonEmpty(() => validateExam(e));
+  });
+  it('validatePractice never throws', () => {
+    nonEmpty(() => validatePractice(null, exam()));
+    nonEmpty(() => validatePractice(practice(), undefined));
+    nonEmpty(() => validatePractice(practice(), 'x'));
+    nonEmpty(() => validatePractice([null, ...practice().slice(1)], exam()));
+    nonEmpty(() => validatePractice(practice(), [null, ...exam().slice(1)]).concat(['x']));
+  });
+  it('exam duplicate ids', () => {
+    const e = exam();
+    e[1].id = 'e1';
+    expect(has(validateExam(e), 'duplicate id')).toBe(true);
+  });
+});
+
 describe('validateExam', () => {
   it('accepts valid exam', () => expect(validateExam(exam())).toEqual([]));
   it('count', () => expect(has(validateExam(exam().slice(0, 9)), 'exactly 10')).toBe(true));
