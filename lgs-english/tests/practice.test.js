@@ -47,7 +47,7 @@ describe('practice bank: batch A (units 1-5)', () => {
   });
 });
 
-describe.runIf(PRACTICE_QUESTIONS.length === 30)('practice bank: full (30)', () => {
+describe('practice bank: full (30)', () => {
   it('passes validatePractice against the exam', () => {
     expect(validatePractice(PRACTICE_QUESTIONS, EXAM_QUESTIONS)).toEqual([]);
   });
