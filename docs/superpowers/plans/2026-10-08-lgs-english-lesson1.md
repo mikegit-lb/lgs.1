@@ -14,7 +14,7 @@
 
 - Repo root is `C:\Users\mike\Documents\TEACHING#2\LGS` (`git init` there). The web project lives in sub folder `lgs-english/`. Plans/docs live in root `docs/`.
 - The 10 units, in this order, exact names: 1 Friendship, 2 Teen Life, 3 In The Kitchen, 4 On The Phone, 5 The Internet, 6 Adventures, 7 Tourism, 8 Chores, 9 Science, 10 Natural Forces.
-- **Final exam (strict LGS English format):** exactly 10 questions, 4 options labelled A–D, exactly one correct answer, no negative marking, **15-minute limit** (LGS: 75 min / 50 verbal questions = 1.5 min each), one question per unit in unit order (Q1 = Unit 1 … Q10 = Unit 10).
+- **Final exam (strict LGS English format):** exactly 10 questions, 4 options labelled A–D, exactly one correct answer, scored net = correct − wrong/3 ("3 yanlış 1 doğruyu götürür"; blanks do not affect the net — corrected after verification, ruling R11), **15-minute limit** (LGS: 75 min / 50 verbal questions = 1.5 min each), one question per unit in unit order (Q1 = Unit 1 … Q10 = Unit 10).
 - **Exam type counts (exact):** `paragraph` ×3, `visual` ×3 (table, graph, poster/ad/chat), `dialogue` ×2 (everyday expressions), `vocabulary` ×2.
 - **Practice bank:** exactly 30 drill questions = 3 per unit, same schema and A–D format as the exam; each unit's 3 drills use ≥2 distinct types; bank totals `paragraph` 8, `visual` 8, `dialogue` 7, `vocabulary` 7; across the bank `dialogue` items collectively cover inviting, accepting, refusing, apologising, asking for/giving directions, and making requests.
 - **Study page per unit:** 8–10 key words (EN + TR), 3–5 useful phrases, one grammar focus (title + 2–3 points + 2 examples each), one model text (passage or dialogue exhibit), one Turkish exam tip.
