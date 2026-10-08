@@ -21,8 +21,16 @@ export function renderFlashcards(words) {
     const text = flipped ? w.tr : w.en;
     const lang = flipped ? 'Türkçe' : 'İngilizce';
     cardBtn.textContent = '';
-    cardBtn.appendChild(h('span', { class: 'flashcard-lang' }, lang));
-    cardBtn.appendChild(h('span', { class: 'flashcard-word', lang: flipped ? 'tr' : 'en' }, text));
+    // A fresh face element per paint restarts the CSS flip-in animation (disabled under reduced motion).
+    cardBtn.appendChild(
+      h(
+        'span',
+        { class: `flashcard-face ${announce ? 'flip-in' : ''}`.trim() },
+        h('span', { class: 'flashcard-lang' }, lang),
+        h('span', { class: 'flashcard-word', lang: flipped ? 'tr' : 'en' }, text),
+        h('span', { class: 'flashcard-hint', 'aria-hidden': 'true' }, 'Çevirmek için dokun ↻'),
+      ),
+    );
     cardBtn.classList.toggle('flipped', flipped);
     cardBtn.setAttribute('aria-label', `${lang}: ${text}. Kartı çevir.`);
     counter.textContent = `${index + 1} / ${words.length}`;

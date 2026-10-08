@@ -4,6 +4,8 @@ import { studyView } from './studyView.js';
 import { practiceView } from './practiceView.js';
 import { examView } from './examView.js';
 import { resultsView } from './resultsView.js';
+import { h } from './dom.js';
+import { createHeader } from './header.js';
 
 const VIEWS = { home: homeView, study: studyView, practice: practiceView, exam: examView, results: resultsView };
 
@@ -20,7 +22,15 @@ export function mountApp(root, deps = {}) {
     setIntervalFn: deps.setIntervalFn ?? ((fn, ms) => setInterval(fn, ms)),
     clearIntervalFn: deps.clearIntervalFn ?? ((id) => clearInterval(id)),
     go,
+    refresh: () => header.update(),
+    setChromeInert: (on) => header.el.toggleAttribute('inert', !!on),
   };
+  const header = createHeader(ctx);
+  const content = h('div', { class: 'app-content' });
+  root.classList.add('app-shell');
+  root.setAttribute('translate', 'no');
+  root.textContent = '';
+  root.append(header.el, content);
 
   function go(name, arg) {
     if (destroyed) return;
@@ -29,10 +39,12 @@ export function mountApp(root, deps = {}) {
       dispose = null;
       d();
     }
-    root.textContent = '';
+    content.textContent = '';
+    header.el.removeAttribute('inert');
     const view = VIEWS[name](ctx, arg);
     dispose = view.dispose ?? null;
-    root.appendChild(view.el);
+    content.appendChild(view.el);
+    header.update(view.el.dataset.screen);
     if (typeof document !== 'undefined') {
       if (view.title) document.title = `${view.title} | LGS İngilizce`;
       const h1 = view.el.querySelector('h1');

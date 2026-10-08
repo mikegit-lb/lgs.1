@@ -34,3 +34,22 @@ describe('styles.css bytes', () => {
     for (const m of css.matchAll(/content\s*:\s*([^;]+);/g)) expect(m[1]).not.toContain('¹');
   });
 });
+
+describe('redesign stylesheets', () => {
+  const files = ['src/styles.css', 'src/layout.css', 'src/themes.css'].map((f) => [f, readFileSync(f, 'utf8')]);
+  it.each(files)('%s is offline-only (no external url/@import) and free of control characters', (_, text) => {
+    expect(text).not.toMatch(/@import|url\(\s*['"]?https?:/i);
+    expect(/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(text)).toBe(false);
+  });
+  it('reduced motion disables all animation and hides the confetti', () => {
+    const themes = files[2][1];
+    const block = themes.slice(themes.indexOf('@media (prefers-reduced-motion: reduce)'));
+    expect(block).toMatch(/animation:\s*none\s*!important/);
+    expect(block).toMatch(/transition:\s*none\s*!important/);
+    expect(block).toMatch(/\.confetti\s*\{\s*display:\s*none/);
+  });
+  it('defines a theme for every unit 1..10', () => {
+    const themes = files[2][1];
+    for (let i = 1; i <= 10; i++) expect(themes).toMatch(new RegExp(`\\[data-unit="${i}"\\]\\s*\\{[^}]*--u-deep`));
+  });
+});

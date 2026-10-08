@@ -3,6 +3,9 @@
 import { svg } from './dom.js';
 export { mascot, MOODS } from './mascot.js';
 
+/** Decorative emoji per unit (always rendered aria-hidden). */
+export const UNIT_EMOJI = { 1: '🤝', 2: '🎧', 3: '🍳', 4: '📱', 5: '🌐', 6: '🧗', 7: '🗺️', 8: '🧹', 9: '🔬', 10: '🌋' };
+
 const SKIN = '#F4C7A1';
 const INK = '#1C2233';
 const SUN = '#FACC15';

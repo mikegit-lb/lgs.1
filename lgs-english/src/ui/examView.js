@@ -5,6 +5,8 @@ import { EXAM_SECONDS, formatTime, remainingSeconds, createCountdown } from '../
 import { saveSession, clearSession, loadProgress, saveProgress, recordExam } from '../lib/storage.js';
 import { renderQuestion, screenRoot } from './questionView.js';
 import { resultsView } from './resultsView.js';
+import { progressBar } from './widgets.js';
+import { timerLevel } from '../lib/gamify.js';
 
 const ANNOUNCE = [
   [300, '5 dakika kaldı.'],
@@ -45,19 +47,38 @@ export function examView(ctx, arg = {}) {
   const startRemaining = remainingSeconds(deadlineMs, ctx.now());
 
   const timerEl = h('span', { class: 'timer', role: 'timer', 'aria-label': 'Kalan süre' });
+  const timerAlert = h('span', { class: 'timer-alert' });
+  const timerPill = h(
+    'p',
+    { class: 'timer-wrap timer-pill', 'data-level': 'ok' },
+    h('span', { 'aria-hidden': 'true' }, '⏱️ '),
+    'Kalan süre: ',
+    timerEl,
+    timerAlert,
+  );
   const live = h('p', { class: 'visually-hidden', 'aria-live': 'polite' });
   const body = h('div', { class: 'exam-body' });
+  const side = h('div', { class: 'exam-side-body' });
   const main = h(
     'div',
     { class: 'exam-main' },
     h(
       'div',
-      { class: 'exam-header' },
-      h('h1', null, 'Final Sınavı'),
-      h('p', { class: 'timer-wrap' }, 'Kalan süre: ', timerEl),
+      { class: 'exam-layout' },
+      h(
+        'div',
+        { class: 'exam-question-col' },
+        h(
+          'div',
+          { class: 'exam-header' },
+          h('span', { class: 'exam-trophy', 'aria-hidden': 'true' }, '🏆'),
+          h('h1', null, 'Final Sınavı'),
+        ),
+        h('p', { class: 'exam-note' }, '3 yanlış cevap 1 doğru cevabı götürür. Boş bıraktığın sorular puanını etkilemez.'),
+        body,
+      ),
+      h('aside', { class: 'exam-side', 'aria-label': 'Sınav paneli' }, timerPill, side),
     ),
-    h('p', { class: 'exam-note' }, '3 yanlış cevap 1 doğru cevabı götürür. Boş bıraktığın sorular puanını etkilemez.'),
-    body,
   );
   const el = screenRoot('exam', main, live);
 
@@ -117,25 +138,38 @@ export function examView(ctx, arg = {}) {
     const i = state.current;
     const q = state.questions[i];
     const n = state.questions.length;
+    const answered = n - unansweredCount(state);
     body.textContent = '';
     body.append(
+      h(
+        'section',
+        { class: 'card question-card' },
+        h('h2', { class: 'question-number' }, `Soru ${i + 1} / ${n}`, state.flagged[i] ? h('span', { class: 'tag tag-flag' }, ' İşaretli') : null),
+        h('div', { lang: 'en' }, renderQuestion(q, { selected: state.answers[i], onChoose: choose })),
+        h('p', { class: 'key-hint' }, 'İpucu: A, B, C, D tuşlarıyla da seçebilirsin.'),
+        h(
+          'div',
+          { class: 'actions exam-actions step-actions' },
+          h('button', { type: 'button', class: 'btn btn-secondary prev-btn', disabled: i === 0, onclick: () => update(goTo(state, i - 1), '.prev-btn') }, '‹ Önceki'),
+          h('button', { type: 'button', class: 'btn btn-secondary next-btn', disabled: i === n - 1, onclick: () => update(goTo(state, i + 1), '.next-btn') }, 'Sonraki ›'),
+        ),
+      ),
+    );
+    side.textContent = '';
+    side.append(
+      progressBar(`Cevaplanan ${answered}/${n}`, answered, n, 'answered-progress'),
       h('nav', { class: 'nav-strip', 'aria-label': 'Sorular' }, state.questions.map((_, k) => navButton(k))),
-      h('h2', { class: 'question-number' }, `Soru ${i + 1} / ${n}`, state.flagged[i] ? h('span', { class: 'tag tag-flag' }, ' İşaretli') : null),
-      h('div', { lang: 'en' }, renderQuestion(q, { selected: state.answers[i], onChoose: choose })),
-      h('p', { class: 'key-hint' }, 'İpucu: A, B, C, D tuşlarıyla da seçebilirsin.'),
       h(
         'div',
-        { class: 'actions exam-actions' },
-        h('button', { type: 'button', class: 'btn btn-secondary prev-btn', disabled: i === 0, onclick: () => update(goTo(state, i - 1), '.prev-btn') }, '‹ Önceki'),
-        h('button', { type: 'button', class: 'btn btn-secondary next-btn', disabled: i === n - 1, onclick: () => update(goTo(state, i + 1), '.next-btn') }, 'Sonraki ›'),
-        h('button', { type: 'button', class: 'btn btn-secondary flag-btn', 'aria-pressed': String(state.flagged[i]), onclick: () => update(toggleFlag(state, i), '.flag-btn') }, state.flagged[i] ? 'Bayrağı kaldır' : 'Bayrakla'),
+        { class: 'actions exam-actions side-actions' },
+        h('button', { type: 'button', class: 'btn btn-secondary flag-btn', 'aria-pressed': String(state.flagged[i]), onclick: () => update(toggleFlag(state, i), '.flag-btn') }, h('span', { 'aria-hidden': 'true' }, '⚑ '), state.flagged[i] ? 'Bayrağı kaldır' : 'Bayrakla'),
         h('button', { type: 'button', class: 'btn btn-secondary clear-btn', disabled: state.answers[i] === null, onclick: clearAnswer }, 'Cevabı temizle'),
         h('button', { type: 'button', class: 'btn btn-primary submit-btn', onclick: openDialog }, 'Sınavı bitir'),
-        h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => ctx.go('home') }, 'Ana sayfaya dön (ilerlemen kaydedilir, süre işlemeye devam eder)'),
+        h('button', { type: 'button', class: 'btn btn-ghost', onclick: () => ctx.go('home') }, 'Ana sayfaya dön (ilerlemen kaydedilir, süre işlemeye devam eder)'),
       ),
     );
     if (focusSel) {
-      const target = body.querySelector(focusSel);
+      const target = main.querySelector(focusSel);
       if (target && !target.disabled) target.focus();
     }
   }
@@ -160,14 +194,16 @@ export function examView(ctx, arg = {}) {
     dialog = { backdrop: h('div', { class: 'dialog-backdrop' }, box), first: cancel, last: confirm };
     el.appendChild(dialog.backdrop);
     main.setAttribute('inert', '');
+    ctx.setChromeInert?.(true);
     cancel.focus();
   }
   function closeDialog() {
     if (!dialog) return;
     main.removeAttribute('inert');
+    ctx.setChromeInert?.(false);
     dialog.backdrop.remove();
     dialog = null;
-    body.querySelector('.submit-btn')?.focus();
+    main.querySelector('.submit-btn')?.focus();
   }
 
   function onKey(e) {
@@ -198,7 +234,13 @@ export function examView(ctx, arg = {}) {
 
   function onTick(remaining) {
     timerEl.textContent = formatTime(remaining);
-    timerEl.classList.toggle('low', remaining < 60);
+    const level = timerLevel(remaining);
+    timerEl.classList.toggle('low', level === 'low');
+    if (timerPill.dataset.level !== level) {
+      timerPill.dataset.level = level;
+      // Non-colour cue next to the colour change.
+      timerAlert.textContent = level === 'low' ? ' · Acele et! ⏰' : level === 'warn' ? ' · Son dakikalar' : '';
+    }
     for (const [t, text] of ANNOUNCE) {
       if (remaining <= t && startRemaining > t && !announced.has(t)) {
         announced.add(t);

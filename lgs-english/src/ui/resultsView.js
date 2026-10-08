@@ -3,9 +3,13 @@ import { summarize } from '../lib/results.js';
 import { clearSession } from '../lib/storage.js';
 import { renderExhibit } from './exhibits.js';
 import { renderStem, renderOptions, LETTERS, screenRoot } from './questionView.js';
+import { moodForNet, MOOD_MESSAGES } from '../lib/gamify.js';
+import { mascot } from './illustrations.js';
+import { progressRing, confetti } from './widgets.js';
 
 const TYPE_LABELS = { paragraph: 'Paragraf', visual: 'Görsel/Tablo/Grafik', dialogue: 'Diyalog', vocabulary: 'Kelime' };
-const STATUS = { correct: '✓ Doğru', wrong: '✗ Yanlış', blank: '– Boş bırakıldı' };
+const TYPE_ICONS = { paragraph: '📄', visual: '📊', dialogue: '💬', vocabulary: '🔤' };
+const STATUS ={ correct: '✓ Doğru', wrong: '✗ Yanlış', blank: '– Boş bırakıldı' };
 
 /** Pure render of a submitted exam; progress is recorded by the exam screen, never here. */
 export function resultsView(ctx, examState) {
@@ -18,7 +22,8 @@ export function resultsView(ctx, examState) {
       const pct = Math.round((v.correct / v.total) * 100);
       return h(
         'li',
-        { class: 'breakdown-row' },
+        { class: 'card breakdown-row breakdown-card', 'data-type': type },
+        h('span', { class: 'breakdown-icon', 'aria-hidden': 'true' }, TYPE_ICONS[type] ?? '📝'),
         h('span', { class: 'breakdown-label' }, `${label}: ${v.correct}/${v.total}`),
         h(
           'div',
@@ -42,19 +47,37 @@ export function resultsView(ctx, examState) {
     );
   });
 
+  const mood = moodForNet(s.net);
+  const trophy = s.net >= 7 ? '🏆' : s.net >= 4 ? '🥈' : '🌱';
   const el = screenRoot(
     'results',
-    h('h1', null, 'Sınav sonucu'),
     h(
       'section',
-      { class: 'card results-score', 'data-correct': String(s.correct), 'data-wrong': String(s.wrong), 'data-blank': String(s.blank) },
-      h('p', { class: 'score-big' }, `${s.correct}/${s.total}`),
-      h('p', null, `Başarı: %${s.percent}`),
-      h('p', null, `Doğru: ${s.correct} · Yanlış: ${s.wrong} · Boş: ${s.blank}`),
-      h('p', { class: 'net' }, `Net: ${s.net.toFixed(2).replace('.', ',')} (doğru − yanlış/3)`),
-      h('p', { class: 'muted' }, '3 yanlış cevap 1 doğru cevabı götürür; boş sorular neti etkilemez.'),
+      { class: 'results-hero', 'data-mood': mood },
+      mood === 'cheer' ? confetti() : null,
+      h('div', { class: 'results-mascot' }, mascot(mood)),
+      h(
+        'div',
+        { class: 'results-text' },
+        h('h1', null, h('span', { 'aria-hidden': 'true' }, `${trophy} `), 'Sınav sonucu'),
+        h('p', { class: 'mood-message' }, MOOD_MESSAGES[mood]),
+      ),
+      h(
+        'div',
+        { class: 'card results-score', 'data-correct': String(s.correct), 'data-wrong': String(s.wrong), 'data-blank': String(s.blank) },
+        progressRing(s.correct / s.total, `${s.correct}/${s.total}`, 'score-ring'),
+        h(
+          'div',
+          { class: 'score-lines' },
+          h('p', { class: 'score-big' }, `${s.correct}/${s.total}`),
+          h('p', null, `Başarı: %${s.percent}`),
+          h('p', null, `Doğru: ${s.correct} · Yanlış: ${s.wrong} · Boş: ${s.blank}`),
+          h('p', { class: 'net' }, `Net: ${s.net.toFixed(2).replace('.', ',')} (doğru − yanlış/3)`),
+          h('p', { class: 'muted' }, '3 yanlış cevap 1 doğru cevabı götürür; boş sorular neti etkilemez.'),
+        ),
+      ),
     ),
-    h('section', { class: 'card' }, h('h2', null, 'Soru türlerine göre'), h('ul', { class: 'breakdown' }, breakdown)),
+    h('section', { class: 'breakdown-section' }, h('h2', null, h('span', { class: 'section-icon', 'aria-hidden': 'true' }, '📊 '), 'Soru türlerine göre'), h('ul', { class: 'breakdown' }, breakdown)),
     s.weakUnits.length
       ? h(
           'section',

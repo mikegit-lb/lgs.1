@@ -4,11 +4,15 @@ import { practiceFor } from '../data/practice.js';
 import { createPractice, choose, nextQuestion, practiceScore } from '../lib/practice.js';
 import { loadProgress, saveProgress, recordPractice } from '../lib/storage.js';
 import { renderQuestion, screenRoot } from './questionView.js';
+import { praiseFor, COMFORT, starsFor } from '../lib/gamify.js';
+import { mascot } from './illustrations.js';
+import { starRow } from './widgets.js';
 
 export function practiceView(ctx, unitId) {
   const u = UNITS.find((x) => x.id === unitId) ?? UNITS[0];
   let state = createPractice(practiceFor(u.id));
   const el = screenRoot('practice');
+  el.dataset.unit = String(u.id);
 
   const homeBtn = () =>
     h('button', { type: 'button', class: 'btn btn-secondary', onclick: () => ctx.go('home') }, 'Ana sayfa');
@@ -26,7 +30,7 @@ export function practiceView(ctx, unitId) {
       feedback = h(
         'div',
         { class: `feedback card ${ok ? 'feedback-correct' : 'feedback-incorrect'}`, tabindex: '-1' },
-        h('p', { class: 'feedback-verdict' }, ok ? '✓ Doğru!' : '✗ Yanlış.'),
+        h('p', { class: 'feedback-verdict' }, ok ? '✓ Doğru!' : '✗ Yanlış.', ' ', h('span', { class: 'cheer' }, ok ? praiseFor(i) : COMFORT)),
         h('p', { class: 'explanation' }, q.explanationTr),
         h(
           'button',
@@ -37,9 +41,14 @@ export function practiceView(ctx, unitId) {
     }
     // Element.append() stringifies null, so filter out the absent feedback block.
     const parts = [
-      h('p', { class: 'unit-number' }, `Ünite ${u.id} – ${u.trName}`),
-      h('h1', null, `Alıştırma: Soru ${i + 1}/${state.questions.length}`),
-      h('div', { lang: 'en' }, renderQuestion(q, { reveal: chosen === null ? null : { chosen }, onChoose: pick })),
+      h(
+        'div',
+        { class: 'practice-head' },
+        h('p', { class: 'unit-number' }, `Ünite ${u.id} – ${u.trName}`),
+        h('h1', null, `Alıştırma: Soru ${i + 1}/${state.questions.length}`),
+        h('div', { class: 'step-dots', 'aria-hidden': 'true' }, state.questions.map((_, k) => h('span', { class: `dot${k < i ? ' done' : k === i ? ' now' : ''}` }))),
+      ),
+      h('div', { class: 'card question-card', lang: 'en' }, renderQuestion(q, { reveal: chosen === null ? null : { chosen }, onChoose: pick })),
       feedback,
       h('div', { class: 'actions' }, homeBtn()),
     ];
@@ -60,13 +69,25 @@ export function practiceView(ctx, unitId) {
   function showSummary() {
     const s = practiceScore(state);
     saveProgress(recordPractice(loadProgress(ctx.store), u.id, s), ctx.store);
+    ctx.refresh?.();
     el.textContent = '';
     el.dataset.screen = 'practice-summary';
     const h1 = h('h1', { tabindex: '-1' }, 'Alıştırma bitti');
+    const stars = starsFor(s);
     el.append(
-      h('p', { class: 'unit-number' }, `Ünite ${u.id} – ${u.trName}`),
-      h1,
-      h('p', { class: 'score-big' }, `Puanın: ${s.correct}/${s.total}`),
+      h(
+        'section',
+        { class: 'card summary-card' },
+        h('div', { class: 'summary-mascot' }, mascot(stars === 3 ? 'cheer' : stars >= 2 ? 'happy' : 'think')),
+        h(
+          'div',
+          null,
+          h('p', { class: 'unit-number' }, `Ünite ${u.id} – ${u.trName}`),
+          h1,
+          h('p', { class: 'score-big' }, `Puanın: ${s.correct}/${s.total}`),
+          starRow(stars),
+        ),
+      ),
       h(
         'div',
         { class: 'actions' },
